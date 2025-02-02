@@ -20,10 +20,10 @@ export interface ServerStatus {
     /** 服务器是否正在运行 */
     running: boolean;
     /** 服务器正在监听的端口 */
-    port: number?;
-    _httpServer: import("http").Server?;
-    _wsServer: import("websocket").server?;
-    _wsConnection: import("websocket").connection?;
+    port: number | null;
+    _httpServer: import("http").Server | null;
+    _wsServer: import("websocket").server | null;
+    _wsConnection: import("websocket").connection | null;
     /**
      * JavaScript 文件地址，如果初始化时指定了奇奇怪怪的 hostname/ip，请自行更正 \<hostname\>
      *
@@ -119,12 +119,12 @@ export type WsMessage =
     | {
           action: "e_invalidMessageFromBrowser" | "e_invalidMessageFromServer";
           body: string;
-          requestId?: string?;
+          requestId?: string | null;
           success: false;
       }
     | {
           action: "e_invalidUid";
-          requestId?: string?;
+          requestId?: string | null;
           success: false;
       };
 export type AdditionalApiUrls = "logout";
