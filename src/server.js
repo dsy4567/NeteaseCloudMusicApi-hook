@@ -100,7 +100,7 @@ function start(port = 16333, hostname = "localhost", cToken = "") {
                             return handleNotFound(response);
 
                         response.writeHead(200, {
-                            "content-type": "text/javascript",
+                            "content-type": "text/javascript; charset=utf-8",
                         });
                         response.end(
                             await fs.readFile(
