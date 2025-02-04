@@ -26,8 +26,8 @@ function init(config = {}) {
     try {
         if (typeof config !== "object" || config === null) config = {};
         setDebugMode(config.debug);
-        forceWeapi = config.forceWeapi ?? false;
-        forceConnection = config.forceConnection ?? false;
+        forceWeapi = !!(config.forceWeapi ?? false);
+        forceConnection = !!(config.forceConnection ?? false);
 
         if (!config.pathToJs)
             config.pathToJs = require.resolve("NeteaseCloudMusicApi");
@@ -118,12 +118,25 @@ function _getRequestJsOriginalExports() {
 function _getCryptoJsExports() {
     return cryptoJsExports;
 }
-function _isForceWeapi() {
-    return forceWeapi;
-}
-function _isForceConnection() {
-    return forceConnection;
-}
+
+const options = {
+    forceConnection: {
+        get() {
+            return forceConnection;
+        },
+        set(/** @type {Boolean} */ v) {
+            return (forceConnection = !!v);
+        },
+    },
+    forceWeapi: {
+        get() {
+            return forceWeapi;
+        },
+        set(/** @type {Boolean} */ v) {
+            return (forceWeapi = !!v);
+        },
+    },
+};
 
 module.exports = {
     init,
@@ -141,6 +154,5 @@ module.exports = {
     additionalApis: server.additionalApis,
     _getCryptoJsExports,
     _getRequestJsOriginalExports,
-    _isForceWeapi,
-    _isForceConnection,
+    options,
 };

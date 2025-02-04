@@ -1,5 +1,69 @@
 import EventEmitter from "events";
 
+/** require & hook，并启动服务器 */
+export function init(config?: InitConfig): import("../types").InitReturnT;
+/** 控制是否输出日志 */
+export function setDebugMode(): void;
+/** 返回结果大约等同与 `require("NeteaseCloudMusicApi")` */
+export function getExports(): any;
+/** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
+export function hook(): boolean;
+/** 暂停对 NeteaseCloudMusicApi/util/request.js 的 hook */
+export function unhook(): boolean;
+export const server: {
+    /** 获取服务器状态 */
+    getServerStatus(): ServerStatus;
+    /** 启动服务器 */
+    start(port?: number, hostname?: string): ServerStatus;
+    /** 关闭服务器 */
+    stop(): Promise<void>;
+    /** 获取服务器状态 */
+    getServerStatus(): ServerStatus;
+    /** 操控浏览器发出请求 */
+    _createRequest(
+        data: RequestData
+    ): Promise<import("../types").createRequestReturnT>;
+};
+export const loginStatus: {
+    /** 获取已登录用户信息：MUSIC_U、__csrf */
+    get: () => LoginStatus;
+    /** 暂时清除服务端的用户信息，不会退出登录 */
+    clear(): LoginStatus;
+};
+/** 一些额外的 api */
+export const additionalApis: {
+    /**
+     * 操控浏览器退出登录
+     */
+    logout():
+        | {
+              status: 200;
+              body: {};
+              cookie: never[];
+          }
+        | {
+              status: 500;
+              body: {};
+              cookie: never[];
+          };
+};
+/** 获取 NeteaseCloudMusicApi/util/request.js 的原始导出 */
+export function _getRequestJsOriginalExports(): any | undefined;
+/** 获取 NeteaseCloudMusicApi/util/crypto.js 的导出 */
+export function _getCryptoJsExports(): any | undefined;
+export const options: {
+    /** 是否强制要求连接浏览器 */
+    forceConnection: {
+        get(): boolean;
+        set(v: boolean): boolean;
+    };
+    /** 是否强制使用 weapi */
+    forceWeapi: {
+        get(): boolean;
+        set(v: boolean): boolean;
+    };
+};
+
 export interface InitConfig {
     /** NeteaseCloudMusicApi/main.js 的绝对路径，可通过 require.resolve("NeteaseCloudMusicApi") 获取 */
     pathToJs?: string;
@@ -13,7 +77,7 @@ export interface InitConfig {
     serverHost?: string;
     /** 替换 "ws://\<hostname\>:\<port\>/\<随机 UUID\>" 的 \<随机 UUID\> */
     connectionToken?: string;
-    /** 是否输出日志 */
+    /** 是否输出日志，默认 false */
     debug?: boolean;
 }
 export interface ServerStatus {
@@ -128,59 +192,3 @@ export type WsMessage =
           success: false;
       };
 export type AdditionalApiUrls = "logout";
-
-/** require & hook，并启动服务器 */
-export function init(config?: InitConfig): import("../types").InitReturnT;
-/** 控制是否输出日志 */
-export function setDebugMode(): void;
-/** 返回结果大约等同与 `require("NeteaseCloudMusicApi")` */
-export function getExports(): any;
-/** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
-export function hook(): boolean;
-/** 暂停对 NeteaseCloudMusicApi/util/request.js 的 hook */
-export function unhook(): boolean;
-export const server: {
-    /** 获取服务器状态 */
-    getServerStatus(): ServerStatus;
-    /** 启动服务器 */
-    start(port?: number, hostname?: string): ServerStatus;
-    /** 关闭服务器 */
-    stop(): Promise<void>;
-    /** 获取服务器状态 */
-    getServerStatus(): ServerStatus;
-    /** 操控浏览器发出请求 */
-    _createRequest(
-        data: RequestData
-    ): Promise<import("../types").createRequestReturnT>;
-};
-export const loginStatus: {
-    /** 获取已登录用户信息：MUSIC_U、__csrf */
-    get: () => LoginStatus;
-    /** 暂时清除服务端的用户信息，不会退出登录 */
-    clear(): LoginStatus;
-};
-/** 一些额外的 api */
-export const additionalApis: {
-    /**
-     * 操控浏览器退出登录
-     */
-    logout():
-        | {
-              status: 200;
-              body: {};
-              cookie: never[];
-          }
-        | {
-              status: 500;
-              body: {};
-              cookie: never[];
-          };
-};
-/** 获取 NeteaseCloudMusicApi/util/request.js 的原始导出 */
-export function _getRequestJsOriginalExports(): any | undefined;
-/** 获取 NeteaseCloudMusicApi/util/crypto.js 的导出 */
-export function _getCryptoJsExports(): any | undefined;
-/** 获取是否强制使用 weapi */
-export function _isForceWeapi(): boolean;
-/** 获取是否强制要求连接浏览器 */
-export function _isForceConnection(): boolean;

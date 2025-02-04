@@ -40,7 +40,7 @@ async function createRequest(uri, data = {}, options = {}, oldNcmApiOptions) {
         const cryptoJsExports = indexJs._getCryptoJsExports();
 
         if (options.crypto !== "weapi") {
-            if (indexJs._isForceWeapi()) {
+            if (indexJs.options.forceWeapi.get()) {
                 log("强制 weapi", uri);
                 options.crypto = "weapi";
             } else {
@@ -49,7 +49,7 @@ async function createRequest(uri, data = {}, options = {}, oldNcmApiOptions) {
             }
         }
         if (!indexJs.server.getServerStatus()._wsConnection) {
-            if (indexJs._isForceConnection()) {
+            if (indexJs.options.forceConnection.get()) {
                 log("要求连接浏览器，但未连接，拒绝请求", uri);
                 reject({
                     body: {

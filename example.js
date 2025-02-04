@@ -4,7 +4,9 @@ const ncmApiPkgName = "../NeteaseCloudMusicApi";
 
 const ncmApiHook = require(".");
 ncmApiHook.init({
+    // 输出调试信息，默认 false
     debug: true,
+    // NeteaseCloudMusicApi/main.js 的绝对路径，可通过 require.resolve("NeteaseCloudMusicApi") 获取
     pathToJs: require.resolve(ncmApiPkgName),
     // 是否强制使用 weapi，默认 false
     forceWeapi: true,
@@ -27,7 +29,7 @@ let loginStatus = {},
     // 检测是否连接到浏览器
     connectingToBrowser = !!ncmApiHook.server.getServerStatus()._wsConnection;
 
-ncmApiHook.loginStatus.get().once("update", ls => {
+ncmApiHook.loginStatus.get().on("update", ls => {
     // update 事件在 用户信息更新/浏览器建立连接后提供用户信息/浏览器断连后清空用户信息
     // 后触发，记得判断是否仍与浏览器保持连接
     connectingToBrowser = !!ncmApiHook.server.getServerStatus()._wsConnection;
@@ -46,10 +48,10 @@ ncmApiHook.loginStatus.get().once("update", ls => {
     }
 });
 ncmApiHook.loginStatus.get().once("update", ls => {
-    // 已经连接到浏览器时，调用 weapi 走浏览器
     if (connectingToBrowser) {
         console.log("用户是否已登录", !!loginStatus.MUSIC_U);
 
+        // 已经连接到浏览器时，调用 weapi 走浏览器
         ncmApi
             .user_account({ crypto: "weapi" })
             .then(res => {
@@ -58,28 +60,16 @@ ncmApiHook.loginStatus.get().once("update", ls => {
             .catch(e => {
                 console.error("已经连接到浏览器 user_account（weapi）", e);
             });
+        // 注意非 weapi 始终不走浏览器（见常见问题 > 如何判断请求走浏览器还是 NeteaseCloudMusicApi）
         ncmApi
-            .song_url({ id: 114514, crypto: "weapi" })
+            .user_account({ crypto: "eapi" })
             .then(res => {
-                console.log("已经连接到浏览器 song_url_v1（weapi）", res.body);
+                console.log("已经连接到浏览器 user_account（eapi）", res.body);
             })
             .catch(e => {
-                console.error("已经连接到浏览器 song_url_v1（weapi）", e);
+                console.error("已经连接到浏览器 user_account（eapi）", e);
             });
-        ncmApi
-            .comment_new({
-                type: 0,
-                id: 1407551413,
-                sortType: 3,
-                crypto: "weapi",
-            })
-            .then(res => {
-                console.log("已经连接到浏览器 comment_new（weapi）", res.body);
-            })
-            .catch(e => {
-                console.error("已经连接到浏览器 comment_new（weapi）", e);
-            });
-        // WebSocket 服务器测压
+        // 大数据，WebSocket 服务器测压
         ncmApi
             .playlist_track_all({
                 id: 5144274490,
@@ -97,16 +87,6 @@ ncmApiHook.loginStatus.get().once("update", ls => {
                     "已经连接到浏览器 playlist_track_all（weapi）",
                     e
                 );
-            });
-
-        // 注意非 weapi 始终不走浏览器（除非指定了 forceWeapi 或 { crypto： "weapi" }）
-        ncmApi
-            .user_account({ crypto: "eapi" })
-            .then(res => {
-                console.log("已经连接到浏览器 user_account（eapi）", res.body);
-            })
-            .catch(e => {
-                console.error("已经连接到浏览器 user_account（eapi）", e);
             });
 
         setTimeout(() => {
@@ -150,19 +130,6 @@ if (!connectingToBrowser) {
         .user_account({ crypto: "eapi" })
         .then(res => {
             console.log("未连接浏览器 user_account（eapi）", res.body);
-            ncmApi
-                .comment_new({
-                    type: 0,
-                    id: 1407551413,
-                    sortType: 3,
-                    crypto: "eapi",
-                })
-                .then(res => {
-                    console.log("未连接浏览器 comment_new（eapi）", res.body);
-                })
-                .catch(e => {
-                    console.error("未连接浏览器 comment_new（eapi）", e);
-                });
         })
         .catch(e => {
             console.error("未连接浏览器 user_account（eapi）", e);
@@ -176,7 +143,7 @@ setTimeout(() => {
     console.log(`
 //******************************//
 
-请使用浏览器打开并在 https://music.163.com 登录你的网易云帐号，
+请使用浏览器打开 https://music.163.com 并登录你的网易云帐号，
 然后打开开发者工具（F12 / Ctrl + Shift + I），在控制台（Console）输入以下代码:
 
 (() => {
