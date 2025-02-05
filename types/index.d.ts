@@ -7,7 +7,7 @@ export function setDebugMode(): void;
 /** 返回结果等同与 `require("NeteaseCloudMusicApi")` */
 export function getExports(): any;
 /** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
-export function hook(): boolean;
+export function hook(_requestJsModule: NodeJS.Module | undefined): boolean;
 /** 暂停对 NeteaseCloudMusicApi/util/request.js 的 hook */
 export function unhook(): boolean;
 export const server: {

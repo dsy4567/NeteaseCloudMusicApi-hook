@@ -14,16 +14,19 @@ let hooked = false,
     forceConnection = false;
 /** @type {NodeJS.Module | undefined} */
 let requestJsModule;
+/** @type {import("../types").InitConfig} */
+let config = {};
 
 /**
  * require & hook
- * @param {import("../types").InitConfig?} config
+ * @param {import("../types").InitConfig?} c
  * @returns {import("../types").InitReturnT}
  */
-function init(config = {}) {
+function init(c = {}) {
     if (hooked) throw new Error("Already initialized.");
 
     try {
+        config = c;
         if (typeof config !== "object" || config === null) config = {};
         setDebugMode(config.debug);
         forceWeapi = !!(config.forceWeapi ?? false);
@@ -35,11 +38,11 @@ function init(config = {}) {
         const pathToRequestJs = path.join(config.target, "../util/request.js");
         const pathToCryptoJs = path.join(config.target, "../util/crypto.js");
 
-        req = require(config.target);
+        require(pathToRequestJs);
         requestJsModule = require.cache[pathToRequestJs];
         cryptoJsExports = require(pathToCryptoJs);
         if (requestJsModule) {
-            hook();
+            hook(requestJsModule);
             log("request.js hooked:", pathToRequestJs);
         } else {
             unhook();
@@ -74,8 +77,20 @@ function getExports() {
     if (!req) throw new Error("Not initialized.");
     return req;
 }
-/** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
-function hook() {
+/**
+ * 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook
+ * @param {NodeJS.Module | undefined} _requestJsModule
+ */
+function hook(_requestJsModule) {
+    if (_requestJsModule) requestJsModule = _requestJsModule;
+    else {
+        const pathToRequestJs = path.join(config.target, "../util/request.js");
+        const pathToCryptoJs = path.join(config.target, "../util/crypto.js");
+
+        require(pathToRequestJs);
+        requestJsModule = require.cache[pathToRequestJs];
+        cryptoJsExports = require(pathToCryptoJs);
+    }
     if (
         requestJsModule &&
         // @ts-ignore
@@ -88,6 +103,7 @@ function hook() {
 
         hooked = true;
     }
+    req = require(config.target);
     return hooked;
 }
 /** 暂停对 NeteaseCloudMusicApi/util/request.js 的 hook */
