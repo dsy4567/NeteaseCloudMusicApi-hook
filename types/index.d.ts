@@ -4,7 +4,7 @@ import EventEmitter from "events";
 export function init(config?: InitConfig): import("../types").InitReturnT;
 /** 控制是否输出日志 */
 export function setDebugMode(): void;
-/** 返回结果大约等同与 `require("NeteaseCloudMusicApi")` */
+/** 返回结果等同与 `require("NeteaseCloudMusicApi")` */
 export function getExports(): any;
 /** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
 export function hook(): boolean;

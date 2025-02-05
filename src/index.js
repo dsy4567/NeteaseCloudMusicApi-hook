@@ -67,12 +67,14 @@ function init(config = {}) {
     }
 }
 /**
+ * 返回结果等同与 `require("NeteaseCloudMusicApi")`
  * @returns {any}
  */
 function getExports() {
     if (!req) throw new Error("Not initialized.");
     return req;
 }
+/** 恢复对 NeteaseCloudMusicApi/util/request.js 的 hook */
 function hook() {
     if (
         requestJsModule &&
@@ -88,6 +90,7 @@ function hook() {
     }
     return hooked;
 }
+/** 暂停对 NeteaseCloudMusicApi/util/request.js 的 hook */
 function unhook() {
     if (
         requestJsModule &&
@@ -103,13 +106,13 @@ function unhook() {
     }
     return hooked;
 }
-/**
+/** 获取 NeteaseCloudMusicApi/util/request.js 的原始导出
  * @returns {any | undefined}
  */
 function _getRequestJsOriginalExports() {
     return requestJsOriginalExports;
 }
-/**
+/** 获取 NeteaseCloudMusicApi/util/crypto.js 的导出
  * @returns {any | undefined}
  */
 function _getCryptoJsExports() {
@@ -117,6 +120,7 @@ function _getCryptoJsExports() {
 }
 
 const options = {
+    /** 是否强制要求连接浏览器 */
     forceConnection: {
         get() {
             return forceConnection;
@@ -125,6 +129,7 @@ const options = {
             return (forceConnection = !!v);
         },
     },
+    /** 是否强制使用 weapi */
     forceWeapi: {
         get() {
             return forceWeapi;

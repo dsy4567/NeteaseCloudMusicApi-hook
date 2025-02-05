@@ -154,10 +154,12 @@ npm i
 
 **实际情况请以在 `ncmApiHook.init()` 指定 `{ debug: true }` 后的日志为准。**
 
+> 你可以结合阅读 [src/hooks/request.js](src/hooks/request.js) （不到 100 行）来理解下面的说明。
+
 满足和以下条件之一，任何请求必定**走浏览器或被拒绝**：
 
 - 在 `ncmApiHook.init()` 指定了 `{ forceWeapi: true, forceConnection: true }`；
-- 在表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === true` 和以下条件之一成立时。
+- 在表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === true` （即：已连接浏览器）和以下条件之一成立时。
   - 在 `ncmApiHook.init()` 指定了 `{ forceWeapi: true }`；
   - 在 `ncmApi.foo_bar()` 指定了 `{ crypto: "weapi" }`；
   - 其他最终会请求 weapi 的情况。
@@ -165,10 +167,10 @@ npm i
 满足以下条件之一，任何请求必定**走 NeteaseCloudMusicApi 或被拒绝**：
 
 - 调用了 `ncmApiHook.unhook()`，随后从未调用 `ncmApiHook.hook()`；
-- 在表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === false` 和以下条件之一成立时；
+- 在表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === false` （即：未连接浏览器）和以下条件之一成立时；
   - 在 `ncmApiHook.init()` 指定了 `{ forceConnection: false }`（默认值）。
-- 表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === true` 成立，且在 `ncmApiHook.init()` 指定了 `{ forceWeapi: false }`（默认值），且以下条件之一成立时。
-  - 在 `ncmApi.foo_bar()` 指定了 `{ crypto: "eapi" | "api" | "linuxapi" }`；
+- 表达式 `!!ncmApiHook.server.getServerStatus()._wsConnection === true` （即：已连接浏览器）成立，且在 `ncmApiHook.init()` 指定了 `{ forceWeapi: false }`（默认值），且以下条件之一成立时。
+  - 在 `ncmApi.foo_bar()` 指定了 `{ crypto: "eapi" | "api" | "linuxapi" }`（即：使用非 weapi 加密）；
 - 其他最终会请求**非** weapi 的情况。
 
 
