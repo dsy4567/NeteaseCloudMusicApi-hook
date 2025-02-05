@@ -29,16 +29,13 @@ function init(config = {}) {
         forceWeapi = !!(config.forceWeapi ?? false);
         forceConnection = !!(config.forceConnection ?? false);
 
-        if (!config.pathToJs)
-            config.pathToJs = require.resolve("NeteaseCloudMusicApi");
+        if (!config.target)
+            config.target = require.resolve("NeteaseCloudMusicApi");
 
-        const pathToRequestJs = path.join(
-            config.pathToJs,
-            "../util/request.js"
-        );
-        const pathToCryptoJs = path.join(config.pathToJs, "../util/crypto.js");
+        const pathToRequestJs = path.join(config.target, "../util/request.js");
+        const pathToCryptoJs = path.join(config.target, "../util/crypto.js");
 
-        req = require(config.pathToJs);
+        req = require(config.target);
         requestJsModule = require.cache[pathToRequestJs];
         cryptoJsExports = require(pathToCryptoJs);
         if (requestJsModule) {

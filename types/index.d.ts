@@ -66,7 +66,7 @@ export const options: {
 
 export interface InitConfig {
     /** NeteaseCloudMusicApi/main.js 的绝对路径，可通过 require.resolve("NeteaseCloudMusicApi") 获取 */
-    pathToJs?: string;
+    target?: string;
     /** 强制使用 weapi，默认 false */
     forceWeapi?: boolean;
     /** 强制要求连接浏览器，默认 false */
@@ -109,9 +109,9 @@ export class LoginStatus extends EventEmitter {
     MUSIC_U: string;
     __csrf: string;
     constructor(MUSIC_U: string = "", __csrf: string = "");
-    /** 用户信息变更/首次获取用户信息时触发（浏览器端依靠检测 cookie MUSIC_U 变化判断） */
+    /** 用户信息变更/首次获取用户信息时触发（浏览器端依靠检测 cookie MUSIC_U __csrf 变化判断） */
     on(event: "update", cb: (loginStatus: LoginStatus) => void): this;
-    /** 用户信息变更/首次获取用户信息时触发（浏览器端依靠检测 cookie MUSIC_U 变化判断） */
+    /** 用户信息变更/首次获取用户信息时触发（浏览器端依靠检测 cookie MUSIC_U __csrf 变化判断） */
     addListener(event: "update", cb: (loginStatus: LoginStatus) => void): this;
 }
 export interface createRequestReturnT {

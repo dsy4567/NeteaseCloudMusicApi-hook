@@ -1,13 +1,13 @@
 // 以前 const ncmApi = require(...) 括号里是什么，ncmApiPkgName 的值就是什么
 // 这里使用自己 clone 下来的 NeteaseCloudMusicApi，而不是 npm install 的
-const ncmApiPkgName = "../NeteaseCloudMusicApi";
+const target = require.resolve("../NeteaseCloudMusicApi");
 
 const ncmApiHook = require(".");
 ncmApiHook.init({
     // 输出调试信息，默认 false
     debug: true,
     // NeteaseCloudMusicApi/main.js 的绝对路径，可通过 require.resolve("NeteaseCloudMusicApi") 获取
-    pathToJs: require.resolve(ncmApiPkgName),
+    target,
     // 是否强制使用 weapi，默认 false
     forceWeapi: true,
     // 是否强制要求连接浏览器，默认 false
@@ -36,6 +36,8 @@ ncmApiHook.loginStatus.get().on("update", ls => {
     loginStatus = ls;
     console.log(
         "cookie MUSIC_U",
+        // 注意：已知即使浏览器已登录，MUSIC_U 可能仍为空字符串，见常见问题 >
+        // 我从 `ncmApiHook.loginStatus.get()` 获得的 `MUSIC_U` 为空字符串怎么办？
         loginStatus.MUSIC_U,
         "__csrf",
         loginStatus.__csrf
@@ -47,9 +49,13 @@ ncmApiHook.loginStatus.get().on("update", ls => {
         console.log("浏览器断连后清空用户信息");
     }
 });
+
+// 🪂 可跳伞 Ctrl + F > 引导用户
 ncmApiHook.loginStatus.get().once("update", ls => {
     if (connectingToBrowser) {
-        console.log("用户是否已登录", !!loginStatus.MUSIC_U);
+        // 错误示范，不建议使用此方法判断是否已登录，见常见问题 >
+        // 我从 `ncmApiHook.loginStatus.get()` 获得的 `MUSIC_U` 为空字符串怎么办？
+        // console.log("用户是否已登录", !!loginStatus.MUSIC_U);
 
         // 已经连接到浏览器时，调用 weapi 走浏览器
         ncmApi
@@ -88,28 +94,6 @@ ncmApiHook.loginStatus.get().once("update", ls => {
                     e
                 );
             });
-
-        setTimeout(() => {
-            ncmApiHook.unhook();
-
-            // unhook 后，调用任何 api 走原版 NeteaseCloudMusicApi
-            ncmApi
-                .user_account({ crypto: "weapi" })
-                .then(res => {
-                    console.log("unhook 后 user_account（weapi）", res.body);
-                })
-                .catch(e => {
-                    console.error("unhook 后 user_account（weapi）", e);
-                });
-            ncmApi
-                .user_account({ crypto: "eapi" })
-                .then(res => {
-                    console.log("unhook 后 user_account（eapi）", res.body);
-                })
-                .catch(e => {
-                    console.error("unhook 后 user_account（eapi）", e);
-                });
-        }, 10000);
     }
 });
 
