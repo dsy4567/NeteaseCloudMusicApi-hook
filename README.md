@@ -52,10 +52,15 @@ browser
 music.163.com
 ```
 
-这样做的好处是，请求在浏览器发出，可以**绕过多数风控手段**（过环境检测、允许用户手动解决人机验证等），也不必费尽心思模拟浏览器的行为。
+优点：
 
-但缺点也很明显：
+- 请求在浏览器发出，可以**绕过多数风控手段**（过环境检测、允许用户手动解决人机验证等）；
+- 不必费尽心思模拟浏览器的行为。
+
+缺点：
+
 - ~~肯定有人认为本项目在画蛇添足~~；
+- 根据项目自身设计，迁移至本项目存在不同大小的难度；
 - 部分返回结果**有异于**原 NeteaseCloudMusicApi（如返回结果里的 `cookie[]` 数组始终为空）；
 - 每次运行都需要引导用户在控制台执行特定代码，**麻烦且增加了**现有应用的**使用门槛**（可以指定固定的 `connectionToken` + 油猴脚本/折腾无头浏览器来解决）；
 - **只能本地使用**，不建议（也很难）在线部署（可以在线应用调访客设备上部署的接口）。
@@ -108,7 +113,7 @@ npm i
 
 ### 如何登录？
 
-请求走浏览器，需提前引导用户在浏览器打开 [music.163.com](https://music.163.com/) 并正常完成登录流程，然后在控制台执行以下代码，无需在 `ncmApi.foo_bar()` 指定 `{ cookie: "MUSIC_U=xxx;" }`（即使指定也会忽略）；
+请求走浏览器，需提前引导用户在浏览器打开 [music.163.com](https://music.163.com/) 并正常完成登录流程，然后在控制台执行以下代码；无需在 `ncmApi.foo_bar()` 指定 `{ cookie: "MUSIC_U=xxx;" }`（即使指定也会忽略）。
 
 ```js
 // 详见 example.js
@@ -121,16 +126,21 @@ npm i
 })();
 ```
 
-请求走 NeteaseCloudMusicApi，在 `ncmApi.foo_bar()` 指定 `{ cookie: "MUSIC_U=xxx;" }` 即可。
+请求走 NeteaseCloudMusicApi，在 `ncmApi.foo_bar()` 指定 `{ cookie: "MUSIC_U=xxx;" }` 即可；
 
 如需获取浏览器内部分 cookies，使用 `ncmApiHook.loginStatus.get()` 即可。
+
+
+### 我从 `ncmApiHook.loginStatus.get()` 获得的 `MUSIC_U` 为空字符串怎么办？
+
+在浏览器中的网易云音乐网页版，cookie `MUSIC_U` 是“HttpOnly”的。手动在开发者工具 > 应用 > Cookie 中取消勾选对应复选框即可。
 
 
 ### 如何强制使用 weapi 加密接口？
 
 以下方法任选其一：
 
-- 在 `ncmApiHook.init()` 指定 `{ forceWeapi: true }` 来禁用非 weapi 接口；
+- 在 `ncmApiHook.init()` 指定 `{ forceWeapi: true }` 来强制使用 weapi 接口；
   ```js
   ncmApiHook.init({ forceWeapi: true });
   ```
@@ -162,16 +172,17 @@ npm i
 - 其他最终会请求**非** weapi 的情况。
 
 
-### 每次都要要求用户在控制台执行代码太麻烦，有没有更方便的方法？
+### 尝试将服务公开到内网以供其他设备上的浏览器使用，浏览器连接时报错怎么办？
 
-1. 在 `ncmApiHook.init()` 指定 `{ connectionToken: "<固定值>" }`；
-2. 适当修改 [src/browser/inject.js](./src/browser/inject.js)，并将其以油猴脚本的形式提供给用户。
+如果报错信息与 HTTPS 相关，可能由于网易云网站设置的浏览器安全策略，使发往本项目服务（非 `127.0.0.1` / `localhost` 等本机环回地址）的 HTTP 请求自动强制升级为 HTTPS，可通过本机运行反向代理等方法解决，例如，可在浏览器端的设备上执行以下操作：
 
-### 是否支持多用户？
+1. 安装 [mitmproxy](https://mitmproxy.org/)；
+2. 执行以下命令：
+  ```bash
+  mitmdump --mode reverse:http://<运行本项目服务设备的 IP 地址>:<端口（默认 16333）> --set listen_port=16333
+  ```
 
-请求走浏览器时，除非不断更换连接的浏览器（同一 NeteaseCloudMusicApi-hook 实例同一时间只能接受一个连接），或者合理使用 `ncmApiHook.unhook()`，否则一个实例**只支持一名用户**；
-
-请求走 NeteaseCloudMusicApi 时，取决于你的应用是否支持多用户。
+如果是其他问题，请见“常见问题 > 浏览器与 NeteaseCloudMusicApi-hook 的服务器意外断连怎么办？”或提交 issue。
 
 
 ### 浏览器与 NeteaseCloudMusicApi-hook 的服务器意外断连怎么办？
@@ -191,3 +202,17 @@ npm i
 
 - 执行 `ncmApi.foo_bar()` 后返回的结果中，`cookie[]` 数组始终为空；
 - 返回结果中的状态码，少数情况下可能不同于 NeteaseCloudMusicApi（如你认为有必要，可提交 issue 讨论）。
+
+
+### 每次都要要求用户在控制台执行代码太麻烦，有没有更方便的方法？
+
+1. 在 `ncmApiHook.init()` 指定 `{ connectionToken: "<固定值>" }`；
+2. 适当修改 [src/browser/inject.js](./src/browser/inject.js)，并将其以油猴脚本/浏览器扩展的形式提供给用户。
+
+或者，折腾无头浏览器。
+
+### 是否支持多用户？
+
+请求走浏览器时，除非不断更换连接的浏览器（同一 NeteaseCloudMusicApi-hook 实例同一时间只能接受一个连接），或者合理使用 `ncmApiHook.unhook()`，否则一个实例**只支持一名用户**；
+
+请求走 NeteaseCloudMusicApi 时，取决于你的应用是否支持多用户。
