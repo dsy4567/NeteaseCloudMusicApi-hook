@@ -1,6 +1,7 @@
 // @ts-check
 "use srtict";
 
+const fs = require("fs");
 const path = require("path");
 const { log, setDebugMode } = require("./utils");
 const server = require("./server");
@@ -17,6 +18,8 @@ let requestJsModule;
 /** @type {import("../types").InitConfig} */
 let config = {};
 
+const tmpPath = require("os").tmpdir();
+
 /**
  * require & hook
  * @param {import("../types").InitConfig?} c
@@ -26,6 +29,14 @@ function init(c = {}) {
     if (hooked) throw new Error("Already initialized.");
 
     try {
+        if (!fs.existsSync(path.resolve(tmpPath, "anonymous_token"))) {
+            fs.writeFileSync(
+                path.resolve(tmpPath, "anonymous_token"),
+                "",
+                "utf-8"
+            );
+        }
+
         config = c;
         if (typeof config !== "object" || config === null) config = {};
         setDebugMode(config.debug);
